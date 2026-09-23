@@ -7,6 +7,56 @@ Sistema para apoiar a secretaria na gestão acadêmica, os alunos na realizaçã
 - [Requisitos funcionais, requisitos não funcionais e regras de negócio](Artefatos/Requisitos/requisitos_e_regras.pdf).
 - [Diagrama de casos de uso](Artefatos/Diagramas/diagrama_de_caso_de_uso.pdf).
 
+## Spring Boot — Sprint 2
+
+Monólito em camadas com **Java 17+, Spring Boot 4.1.1, Spring MVC, Spring Data JPA, Bean Validation, H2 e Flyway**. A infraestrutura de persistência funciona; os casos de uso permanecem como stubs, conforme o escopo estrutural da seção 4.2 (Lab01S02) do enunciado.
+
+As entidades usam Lombok (`@NoArgsConstructor` e `@SuperBuilder`) para gerar os construtores. Crie objetos com `Curso.builder().codigo("ES").nome("Engenharia de Software").totalCreditos(200).build()`. Os métodos de negócio das entidades e serviços continuam como stubs; controllers apenas delegam e repositories permanecem interfaces Spring Data.
+
+```text
+br.edu.sistemamatricula
+├── controller   HTTP e delegação aos serviços
+├── dto          Contratos de entrada/saída e validação
+├── service      Casos de uso e limites transacionais
+├── repository   Acesso aos dados com Spring Data JPA
+├── modelo       Oito entidades e seus relacionamentos
+└── exception    Tratamento de erros com ProblemDetail
+```
+
+Para testar e gerar o JAR no PowerShell, na raiz do repositório:
+
+```powershell
+.\mvnw.cmd verify
+```
+
+Para iniciar a aplicação:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+No Linux/macOS, use `sh ./mvnw verify` e `sh ./mvnw spring-boot:run`. O Maven Wrapper baixa o Maven e as dependências na primeira execução; é necessário ter um JDK instalado e acesso à internet. Também é possível importar o `pom.xml` na IDE. `scripts/compilar.ps1` executa o mesmo `verify` pelo Wrapper.
+
+Após o build, também é possível executar o JAR:
+
+```powershell
+java -jar target/sistema-matricula-0.2.0-SNAPSHOT.jar
+```
+
+A aplicação escuta em `http://127.0.0.1:8080`. O H2 grava em `dados/matriculas.mv.db`, relativo ao diretório de execução, e preserva os dados após reiniciar. Não há dados de exemplo inseridos automaticamente. O Flyway versiona o esquema; o Hibernate somente o valida (`ddl-auto: validate`). Os testes usam bancos separados e não alteram `dados/`.
+
+As variáveis `DB_URL`, `DB_USER`, `DB_PASSWORD`, `SERVER_ADDRESS` e `SERVER_PORT` permitem ajustar a configuração. O driver incluído é H2; outro SGBD exige também seu driver e, quando necessário, um módulo Flyway específico.
+
+Há contratos REST em `/api/cursos`, `/api/disciplinas`, `/api/alunos`, `/api/professores`, `/api/turmas`, `/api/matriculas` e `/api/autenticacao`. **Entradas válidas nos stubs retornam HTTP 501**; entradas inválidas retornam HTTP 400. Por exemplo:
+
+```powershell
+curl.exe -i http://127.0.0.1:8080/api/cursos
+```
+
+O resultado esperado nesta sprint é `501 Not Implemented`, com indicação da sprint 3. Ainda não há CRUD funcional pela API, autenticação/autorização, interface de usuário ou regras de matrícula executáveis. O servidor é local por padrão; não é uma configuração de produção.
+
+Veja o [mapeamento dos métodos e pendências](Artefatos/sprint-2.md) e o [modelo atualizado da arquitetura](Artefatos/Diagramas/arquitetura-spring.md).
+
 ## Histórias de usuário
 
 As histórias seguem o formato **Como [perfil], quero [funcionalidade], para [benefício]**. Cada história está associada ao requisito funcional e ao caso de uso correspondente ou proposto (HU-001 a HU-018).
